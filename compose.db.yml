@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: spotify_clone_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: spotify_clone_db
+    volumes:
+      - postgres_data:/var/lib/postgresql
+volumes:
+  postgres_data:
