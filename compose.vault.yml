@@ -1,0 +1,15 @@
+services:
+  vault:
+    image: hashicorp/vault:2.0.4
+    container_name: spotify_clone_vault
+    restart: always
+    ports:
+      - "8200:8200"
+    environment:
+      VAULT_ADDR: "http://0.0.0.0:8200"
+    volumes:
+      - ./vault.hcl:/vault.hcl
+      - ./vault-data:/vault/data
+    cap_add:
+      - IPC_LOCK
+    command: "vault server -config=/vault.hcl"

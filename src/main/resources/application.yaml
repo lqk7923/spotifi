@@ -1,12 +1,26 @@
 spring:
   application:
     name: spotify-clone-be
+
+  config:
+    import: vault://
+
+  cloud:
+    vault:
+      authentication: TOKEN
+      uri: http://localhost:8200
+      kv:
+        enabled: true
+        backend: secret
+        default-context: auth-db #Maps to `secret/auth-db`
+
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME:spotify_clone_db}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://localhost:5432/${database.name:spotify_clone_db}
+    username: ${database.devUser:postgres}
+    password: ${database.devPassword:postgres}
     driver-class-name: org.postgresql.Driver
+
   jpa:
-      hibernate:
-          ddl-auto: create
-      show-sql: true
+    hibernate:
+      ddl-auto: create
+    show-sql: true
