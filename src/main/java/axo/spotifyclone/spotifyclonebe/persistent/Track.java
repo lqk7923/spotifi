@@ -27,4 +27,7 @@ public class Track {
 
     @Column(nullable = false)
     private String storageName;
+
+    @Column(nullable = false)
+    private String trackKey;
 }
