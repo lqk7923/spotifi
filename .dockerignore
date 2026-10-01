@@ -1,0 +1,8 @@
+# Only the Maven build file and production source are needed in the image.
+**
+!pom.xml
+!src/
+!src/main/
+!src/main/**
+!Dockerfile
+!.dockerignore

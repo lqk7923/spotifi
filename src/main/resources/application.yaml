@@ -3,6 +3,8 @@ spring:
     name: spotify-clone-be
 
   config:
+    activate:
+      on-profile: "!prod"
     import: vault://
 
   cloud:
@@ -22,7 +24,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
 
 r2-storage:
