@@ -15,9 +15,9 @@ spring:
 #        default-context: auth-db #Maps to `secret/auth-db`
         application-name: auth-db,cre-storage
   datasource:
-    url: jdbc:postgresql://localhost:5432/${database.name:spotify_clone_db}
-    username: ${database.devUser:postgres}
-    password: ${database.devPassword:postgres}
+    url: ${database.url:jdbc:postgres://${database.host}/${database.name}}
+    username: ${database.user:postgres}
+    password: ${database.password:postgres}
     driver-class-name: org.postgresql.Driver
 
   jpa:
