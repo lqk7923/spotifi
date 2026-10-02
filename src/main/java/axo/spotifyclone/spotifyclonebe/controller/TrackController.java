@@ -2,8 +2,8 @@ package axo.spotifyclone.spotifyclonebe.controller;
 
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackInfoResponse;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
-import axo.spotifyclone.spotifyclonebe.service.implement.TrackServiceImplement;
-import lombok.AllArgsConstructor;
+import axo.spotifyclone.spotifyclonebe.service.TrackService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,9 +15,9 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/track")
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TrackController {
-    private final TrackServiceImplement trackService;
+    private final TrackService trackService;
 
     @GetMapping("/{bucket}/{id}")
     public TrackPresignedLink getTrackPresignedLink(
