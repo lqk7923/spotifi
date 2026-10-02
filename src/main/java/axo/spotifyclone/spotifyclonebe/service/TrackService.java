@@ -1,6 +1,7 @@
 package axo.spotifyclone.spotifyclonebe.service;
 
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackInfoResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
 
 import java.time.Duration;
 import java.util.List;
@@ -10,7 +11,7 @@ public interface TrackService {
     /**
      * Generate a get presigned link
      */
-    String generatePresignedDownloadUrl(String bucketName, UUID objectKey, Duration expiration);
+    TrackPresignedLink generatePresignedDownloadUrl(String bucketName, UUID objectKey, Duration expiration);
 
     /**
     * Lists all track's information in system

@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: spotify-clone-be
+
+  config:
+    activate:
+      on-profile: "!prod"
+    import: vault://
+
+  cloud:
+    vault:
+      authentication: TOKEN
+      uri: http://localhost:8200
+      kv:
+        enabled: true
+        backend: secret
+        #        default-context: auth-db #Maps to `secret/auth-db`
+        application-name: auth-db,cre-storage
+  datasource:
+    url: ${database.url:jdbc:postgres://${database.host}/${database.name}}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+r2-storage:
+  account-id: ${r2.account-id}
+  access-key: ${r2.access-key}
+  secret-key: ${r2.secret-key}

@@ -4,8 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -30,4 +30,13 @@ public class Track {
 
     @Column(nullable = false)
     private String trackKey;
+
+    @Column(nullable = false)
+    private String trackTitle;
+
+    @Column(nullable = false)
+    private Long trackDuration;
+
+    @Column(nullable = false)
+    private String author;
 }

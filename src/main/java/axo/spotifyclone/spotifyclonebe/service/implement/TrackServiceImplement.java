@@ -2,6 +2,7 @@ package axo.spotifyclone.spotifyclonebe.service.implement;
 
 import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackInfoResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
 import axo.spotifyclone.spotifyclonebe.repository.TrackRepository;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class TrackServiceImplement implements TrackService {
     private final CloudflareR2Client cloudflareR2Client;
     private final TrackRepository trackRepository;
 
-    public String generatePresignedDownloadUrl(String bucketName, UUID objectId, Duration expiration) {
+    public TrackPresignedLink generatePresignedDownloadUrl(String bucketName, UUID objectId, Duration expiration) {
         String objectKey = trackRepository
                 .findTrackKeyByIdAndStorageName(objectId, bucketName)
                 .orElseThrow(() -> new RuntimeException("Track not found"));
@@ -33,7 +34,7 @@ public class TrackServiceImplement implements TrackService {
                 .build();
 
         PresignedGetObjectRequest presignedRequest = cloudflareR2Client.getPresigner().presignGetObject(presignRequest);
-        return presignedRequest.url().toString();
+        return TrackPresignedLink.builder().trackPresignedLink(presignedRequest.url().toString()).build();
     }
 
     /**
@@ -41,11 +42,15 @@ public class TrackServiceImplement implements TrackService {
      */
     @Override
     public List<TrackInfoResponse> listTrackData() {
-        return trackRepository.findAll().stream().map(
-                        track -> TrackInfoResponse.builder()
-                                .bucketName(track.getStorageName())
-                                .trackId(String.valueOf(track.getTrackId()))
-                                .build())
+        return trackRepository.findAll()
+                .stream()
+                .map(track -> TrackInfoResponse.builder()
+                        .bucketName(track.getStorageName())
+                        .trackId(String.valueOf(track.getTrackId()))
+                        .trackDuration(track.getTrackDuration())
+                        .trackTitle(track.getTrackTitle())
+                        .author(track.getAuthor())
+                        .build())
                 .toList();
     }
 }

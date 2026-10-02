@@ -10,4 +10,7 @@ import lombok.Getter;
 public class TrackInfoResponse {
     private String bucketName;
     private String trackId;
+    private String trackTitle;
+    private Long trackDuration;
+    private String author;
 }
