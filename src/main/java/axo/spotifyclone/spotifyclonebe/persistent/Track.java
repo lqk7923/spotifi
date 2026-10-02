@@ -1,8 +1,6 @@
 package axo.spotifyclone.spotifyclonebe.persistent;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Generated;
@@ -12,6 +10,11 @@ import org.springframework.data.annotation.CreatedDate;
 import java.util.Date;
 import java.util.UUID;
 
+@Table(
+        indexes = {
+                @Index(name = "idx_track_album_id", columnList = "album_id")
+        }
+)
 @Data
 @NoArgsConstructor
 @Entity
@@ -39,4 +42,7 @@ public class Track {
 
     @Column(nullable = false)
     private String author;
+
+    @Column(nullable = false)
+    private UUID albumId;
 }

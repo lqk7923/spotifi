@@ -28,7 +28,7 @@ public class TrackController {
     }
 
     @GetMapping("/all")
-    public List<TrackInfoResponse> getTrackList(){
-        return trackService.listTrackData();
+    public List<TrackInfoResponse> getTracksList(){
+        return trackService.listTracksInfo();
     }
 }

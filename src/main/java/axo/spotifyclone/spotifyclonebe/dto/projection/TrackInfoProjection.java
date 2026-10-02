@@ -1,18 +1,20 @@
-package axo.spotifyclone.spotifyclonebe.dto.response;
+package axo.spotifyclone.spotifyclonebe.dto.projection;
 
-import lombok.Builder;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+
+import java.util.UUID;
 
 @Builder
 @Getter
 @AllArgsConstructor
-public class TrackInfoResponse {
+public class TrackInfoProjection {
     private String bucketName;
-    private String trackId;
+    private UUID trackId;
     private String trackTitle;
     private Long trackDuration;
     private String author;
     private String albumTitle;
-    private String albumId;
+    private UUID albumId;
 }

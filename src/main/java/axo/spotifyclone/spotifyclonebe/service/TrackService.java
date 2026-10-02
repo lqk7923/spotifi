@@ -16,5 +16,10 @@ public interface TrackService {
     /**
     * Lists all track's information in system
     */
-    List<TrackInfoResponse> listTrackData();
+    List<TrackInfoResponse> listTracksInfo();
+
+    /**
+     * Lists all track's information of a special album in system
+     */
+    List<TrackInfoResponse> listTracksInfoByAlbumId(UUID albumId);
 }
