@@ -4,7 +4,8 @@ VALUES
 ('audio-for-spotifi-aka-spotify-clone', 'music_loop_003_by_@josefpres.wav', 'Music Loop 003',142000, 'josefpres'),
 ('audio-for-spotifi-aka-spotify-clone', 'music_loop_004_by_@josefpres.wav', 'Music Loop 004',51000, 'josefpres'),
 ('audio-for-spotifi-aka-spotify-clone', 'piano_213_by_@josefpres.wav', 'Piano 213',130000, 'josefpres'),
-('audio-for-spotifi-aka-spotify-clone', 'piano_212_by_@josefpres.wav', 'Piano 212',250000, 'josefpres');
-
+('audio-for-spotifi-aka-spotify-clone', 'piano_212_by_@josefpres.wav', 'Piano 212',250000, 'josefpres'),
+('audio-for-spotifi-aka-spotify-clone', 'peaceful_harp_@joanne_pang.wav', 'Peaceful Harp',19000, 'joanne_pang'),
+('audio-for-spotifi-aka-spotify-clone', 'peaceful_ambiance_@theojt.wav', 'Peaceful Ambiance',56000, 'theojt');
 
 SELECT * FROM TRACK;
