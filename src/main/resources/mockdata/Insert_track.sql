@@ -16,3 +16,5 @@ VALUES
 ('audio-for-spotifi-aka-spotify-clone', 'peaceful_ambiance_@theojt.wav', 'Peaceful Ambiance',56000, 'theojt', '00000000-0000-0000-0000-000000000004'::uuid);
 
 SELECT * FROM TRACK;
+
+select storage_name, track_id, track_title, track_duration from track join album on track.album_id = album.album_id and album.album_id = '00000000-0000-0000-0000-000000000006'::uuid;

@@ -56,19 +56,4 @@ public class TrackServiceImplement implements TrackService {
                 .toList();
     }
 
-    @Override
-    public List<TrackInfoResponse> listTracksInfoByAlbumId(UUID albumId) {
-        return trackRepository.findAllTracksInfoByAlbumId(albumId)
-                .stream()
-                .map(track -> TrackInfoResponse.builder()
-                        .bucketName(track.getBucketName())
-                        .trackId(String.valueOf(track.getTrackId()))
-                        .trackDuration(track.getTrackDuration())
-                        .trackTitle(track.getTrackTitle())
-                        .author(track.getAuthor())
-                        .albumTitle(track.getAlbumTitle())
-                        .albumId(String.valueOf(track.getAlbumId()))
-                        .build())
-                .toList();
-    }
 }

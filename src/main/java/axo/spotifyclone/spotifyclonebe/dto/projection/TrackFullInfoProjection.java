@@ -9,9 +9,12 @@ import java.util.UUID;
 @Builder
 @Getter
 @AllArgsConstructor
-public class TrackInfoProjection {
+public class TrackFullInfoProjection {
     private String bucketName;
     private UUID trackId;
     private String trackTitle;
     private Long trackDuration;
+    private String author;
+    private String albumTitle;
+    private UUID albumId;
 }
