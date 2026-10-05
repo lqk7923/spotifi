@@ -10,8 +10,7 @@ import org.hibernate.annotations.Generated;
 import org.springframework.data.annotation.CreatedDate;
 
 
-import java.sql.Time;
-import java.util.List;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -28,8 +27,10 @@ public class Album {
     @CreatedDate
     @Column(nullable = false)
     @ColumnDefault("now()")
-    private Time createdDay;
+    private LocalDate albumReleaseDate;
 
     @Column(nullable = false)
     private String albumTitle;
+
+    private String albumCoverKey;
 }

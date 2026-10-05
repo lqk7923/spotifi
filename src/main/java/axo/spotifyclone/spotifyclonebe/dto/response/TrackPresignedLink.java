@@ -9,4 +9,5 @@ import lombok.Getter;
 @AllArgsConstructor
 public class TrackPresignedLink {
     private String trackPresignedLink;
+    private String coverPresignedLink;
 }

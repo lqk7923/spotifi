@@ -7,12 +7,12 @@ import lombok.Getter;
 @Builder
 @Getter
 @AllArgsConstructor
-public class TrackInfoResponse {
-    private String bucketName;
+public class TrackDataResponse {
     private String trackId;
     private String trackTitle;
     private Long trackDuration;
     private String author;
     private String albumTitle;
     private String albumId;
+    private String coverPresignedUrl;
 }

@@ -1,13 +1,15 @@
 package axo.spotifyclone.spotifyclonebe.service.implement;
 
-import axo.spotifyclone.spotifyclonebe.dto.projection.AlbumInfoResponse;
-import axo.spotifyclone.spotifyclonebe.dto.projection.TrackFullInfoProjection;
-import axo.spotifyclone.spotifyclonebe.dto.projection.TrackInfoProjection;
+import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
+import axo.spotifyclone.spotifyclonebe.dto.response.AlbumDataResponse;
+import axo.spotifyclone.spotifyclonebe.dto.projection.TrackFullDataProjection;
+import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDataProjection;
 import axo.spotifyclone.spotifyclonebe.repository.AlbumRepository;
 import axo.spotifyclone.spotifyclonebe.service.AlbumService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,27 +17,28 @@ import java.util.UUID;
 @AllArgsConstructor
 public class AlbumServiceImplement implements AlbumService {
     private final AlbumRepository albumRepository;
+    private final CloudflareR2Client cloudflareR2Client;
 
     @Override
-    public AlbumInfoResponse getAlbumData(UUID albumId) {
-        List<TrackFullInfoProjection> trackFullInfos = albumRepository.findByAlbumId(albumId);
-        if(trackFullInfos.isEmpty())
+    public AlbumDataResponse getAlbumData(UUID albumId) {
+        List<TrackFullDataProjection> listTrackData = albumRepository.findByAlbumId(albumId);
+        if(listTrackData.isEmpty())
             throw new RuntimeException("Album isn't exist");
-        TrackFullInfoProjection firstTrackFullInfo = trackFullInfos.getFirst();
-        return AlbumInfoResponse.builder()
+        TrackFullDataProjection firstTrackFullInfo = listTrackData.getFirst();
+        return AlbumDataResponse.builder()
                 .author(firstTrackFullInfo.getAuthor())
                 .albumId(firstTrackFullInfo.getAlbumId())
                 .albumTitle(firstTrackFullInfo.getAlbumTitle())
-                .albumTracks(trackFullInfos
+                .albumCoverPresignedUrl(cloudflareR2Client.presignedGetObjectRequest(Duration.ofMinutes(2),firstTrackFullInfo.getAlbumCoverKey()))
+                .albumTracks(listTrackData
                         .stream()
-                        .map(trackFullInfo -> TrackInfoProjection.builder()
-                                        .bucketName(trackFullInfo.getBucketName())
+                        .map(trackFullInfo -> TrackDataProjection.builder()
                                         .trackDuration(trackFullInfo.getTrackDuration())
                                         .trackId(trackFullInfo.getTrackId())
                                         .trackTitle(trackFullInfo.getTrackTitle())
                                         .build()
-                        )
-                        .toList()
-                ).build();
+                        ).toList())
+                .releaseDate(firstTrackFullInfo.getAlbumReleaseDate())
+                .build();
     }
 }

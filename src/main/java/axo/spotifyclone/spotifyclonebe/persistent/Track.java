@@ -24,13 +24,6 @@ public class Track {
     @Generated @ColumnDefault("uuidv7()")
     private UUID trackId;
 
-    @CreatedDate
-    @Generated @ColumnDefault("now()")
-    private Date releaseDate;
-
-    @Column(nullable = false)
-    private String storageName;
-
     @Column(nullable = false)
     private String trackKey;
 

@@ -1,14 +1,13 @@
 package axo.spotifyclone.spotifyclonebe.service.implement;
 
 import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackInfoResponse;
+import axo.spotifyclone.spotifyclonebe.dto.projection.TrackInfoProjection;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
 import axo.spotifyclone.spotifyclonebe.repository.TrackRepository;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,43 +16,37 @@ import java.util.UUID;
 @Service
 @AllArgsConstructor
 public class TrackServiceImplement implements TrackService {
+
     private final CloudflareR2Client cloudflareR2Client;
     private final TrackRepository trackRepository;
 
-    public TrackPresignedLink generatePresignedDownloadUrl(String bucketName, UUID objectId, Duration expiration) {
-        String objectKey = trackRepository
-                .findTrackKeyByIdAndStorageName(objectId, bucketName)
+    public TrackPresignedLink generatePresignedDownloadUrl(UUID objectId, Duration expiration) {
+        TrackInfoProjection objectKey = trackRepository
+                .findTrackKeyById(objectId)
                 .orElseThrow(() -> new RuntimeException("Track not found"));
 
-        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
-                .signatureDuration(expiration)
-                .getObjectRequest(builder -> builder
-                        .bucket(bucketName)
-                        .key(objectKey)
-                        .build())
+        return TrackPresignedLink.builder()
+                .coverPresignedLink(cloudflareR2Client.presignedGetObjectRequest(expiration, objectKey.getCoverKey()))
+                .trackPresignedLink(cloudflareR2Client.presignedGetObjectRequest(expiration, objectKey.getTrackKey()))
                 .build();
-
-        PresignedGetObjectRequest presignedRequest = cloudflareR2Client.getPresigner().presignGetObject(presignRequest);
-        return TrackPresignedLink.builder().trackPresignedLink(presignedRequest.url().toString()).build();
     }
 
     /**
      * Lists all track's information in system
      */
     @Override
-    public List<TrackInfoResponse> listTracksInfo() {
+    public List<TrackDataResponse> listTracksInfo() {
         return trackRepository.findAllTracksInfo()
                 .stream()
-                .map(track -> TrackInfoResponse.builder()
-                        .bucketName(track.getBucketName())
+                .map(track -> TrackDataResponse.builder()
                         .trackId(String.valueOf(track.getTrackId()))
                         .trackDuration(track.getTrackDuration())
                         .trackTitle(track.getTrackTitle())
                         .author(track.getAuthor())
                         .albumTitle(track.getAlbumTitle())
                         .albumId(String.valueOf(track.getAlbumId()))
+                        .coverPresignedUrl(cloudflareR2Client.presignedGetObjectRequest(Duration.ofMinutes(2), track.getAlbumCoverKey()))
                         .build())
                 .toList();
     }
-
 }

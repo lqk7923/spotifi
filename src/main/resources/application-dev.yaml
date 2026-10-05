@@ -29,3 +29,4 @@ r2-storage:
   account-id: ${r2.account-id}
   access-key: ${r2.access-key}
   secret-key: ${r2.secret-key}
+  bucket-name: ${r2.bucket-name}

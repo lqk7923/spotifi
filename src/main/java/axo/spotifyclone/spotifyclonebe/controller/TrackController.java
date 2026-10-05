@@ -1,6 +1,6 @@
 package axo.spotifyclone.spotifyclonebe.controller;
 
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackInfoResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +19,15 @@ import java.util.UUID;
 public class TrackController {
     private final TrackService trackService;
 
-    @GetMapping("/{bucket}/{id}")
+    @GetMapping("/track/{id}")
     public TrackPresignedLink getTrackPresignedLink(
-        @PathVariable String bucket,
         @PathVariable UUID id
     ){
-        return trackService.generatePresignedDownloadUrl(bucket, id, Duration.ofMinutes(2));
+        return trackService.generatePresignedDownloadUrl(id, Duration.ofMinutes(2));
     }
 
     @GetMapping("/all")
-    public List<TrackInfoResponse> getTracksList(){
+    public List<TrackDataResponse> getTracksList(){
         return trackService.listTracksInfo();
     }
 }
