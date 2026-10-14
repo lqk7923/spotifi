@@ -34,6 +34,9 @@ management:
   endpoint:
     health:
       show-details: never
+  health:
+    db:
+      enabled: false
 
 r2-storage:
   account-id: ${R2_ACCOUNT_ID}
