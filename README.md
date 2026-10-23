@@ -1,119 +1,102 @@
 # Spotify Clone Backend
 
-Java 21, Spring Boot, PostgreSQL, HashiCorp Vault, and Cloudflare R2. Run all commands from the project root. Requires JDK 21, Maven, Docker Compose, and a Cloudflare account with R2 enabled.
+Java 21, Spring Boot, PostgreSQL, and Cloudflare R2. Run all commands from the project root. Requires JDK 21, Maven, Docker Compose, and R2 credentials.
 
 ## Quick setup
 
-```bash
-docker compose -f compose.db.yml up -d
-docker compose -f compose.vault.yml up -d
-```
-
-Complete [Vault setup](#vault-setup) and [Cloudflare R2 setup](#cloudflare-r2-setup) below before building or starting the app. Vault must be unsealed and contain the application keys.
-
-Set the Vault token in the same terminal used to run Maven and Java:
+Copy `.env.example` to `.env` and fill in the database and R2 settings. If you already have a `.env`, add the missing settings from `.env.example` instead of overwriting it.
 
 ```powershell
-# PowerShell: replace the placeholder with your local Vault token
-$env:SPRING_CLOUD_VAULT_TOKEN = "<vault-token>"
+# PowerShell (new setup only)
+Copy-Item .env.example .env
 ```
 
 ```bash
-# Bash
-export SPRING_CLOUD_VAULT_TOKEN='<vault-token>'
+# Bash (new setup only)
+cp .env.example .env
 ```
 
-Then build and run:
+Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY`, `R2_SECRET_KEY`, and `R2_BUCKET_NAME` to your actual R2 values, then start PostgreSQL and the app:
 
 ```bash
-mvn "-Duser.timezone=UTC" clean package
+docker compose -f compose.db.yml up -d
+mvn "-Duser.timezone=UTC" spring-boot:run
+```
+
+The app defaults to the `dev` profile and starts on `http://localhost:8080`. Stop it with `Ctrl+C`. You can change `-Duser.timezone=UTC` to fit your location.
+
+To build and run the JAR:
+
+```bash
+mvn clean package -DskipTests
 java -Duser.timezone=UTC -jar target/spotify-clone-be-0.0.1-SNAPSHOT.jar
 ```
 
-> [!NOTE]
-> You can change `-Duser.timezone=UTC` to fit your location. `.env.example` documents the Vault token variable, but `java -jar` does not automatically load `.env`. Export the variable as above or set it in your IDE's run configuration.
-
-The app starts on `http://localhost:8080`. Stop it with `Ctrl+C`.
-
 ## Configuration
 
-Default database: `localhost:5432/spotify_clone_db`, user `postgres`, password `postgres`.
+Spring automatically imports `.env` from the current working directory as a Java properties file. This works with Maven, `java -jar`, and IDE runs whose working directory is the project root. An absent `.env` is allowed when configuration is supplied through environment variables. OS environment variables and JVM system properties override `.env` values.
 
-- `compose.db.yml` uses `DB_USER` and `DB_PASSWORD` to initialize PostgreSQL. Set these before the first database startup if you want different credentials.
-- The app reads `database.devUser` and `database.devPassword` from Vault, with `postgres` as the fallback for both. Keep these values consistent with the PostgreSQL credentials. Changing Compose variables does not change credentials in an existing database volume.
-- To use a different database name, set the optional Vault key `database.name` in `secret/auth-db` and update `POSTGRES_DB` in `compose.db.yml` to match. The app does not currently read `DB_NAME`.
+Use plain, unquoted `KEY=value` lines, with comments on their own lines. Do not use `export`, shell interpolation, or inline comments. Java properties treat backslashes as escapes; double any literal backslashes in a value. `.env` is ignored by Git and excluded from Docker builds.
 
-> [!NOTE]
-> The current JPA setting is `ddl-auto: create-drop`, so application-managed tables are recreated on startup and dropped on shutdown. Use a disposable development database.
+| Variable | Purpose | Development default |
+| --- | --- | --- |
+| `DB_HOST` | PostgreSQL host | `localhost` |
+| `DB_PORT` | PostgreSQL port; also the Compose host port | `5432` |
+| `DB_NAME` | Database name; also used by Compose | `spotify_clone_db` |
+| `DB_USER` | PostgreSQL username; also used by Compose | `postgres` |
+| `DB_PASSWORD` | PostgreSQL password; also used by Compose | `postgres` |
+| `DB_URL` | Full JDBC URL, overriding host/port/name for the app | Built from the settings above |
+| `DB_POOL_SIZE` | Maximum connection pool size in `prod` | `5` in `prod` |
+| `R2_ACCOUNT_ID` | Cloudflare account ID | Required |
+| `R2_ACCESS_KEY` | R2 S3 Access Key ID | Required |
+| `R2_SECRET_KEY` | R2 S3 Secret Access Key | Required |
+| `R2_BUCKET_NAME` | R2 bucket name | Required |
+| `PORT` | HTTP port | `8080` (`10000` in `prod`) |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed browser origins | Empty |
 
-## Vault setup
+Compose also reads `.env` automatically. Keep its PostgreSQL settings consistent with the app. Changing these variables does not change credentials or databases in an existing PostgreSQL volume.
 
-Setup walkthrough: [How to Secure Secret Data in Spring Boot Using HashiCorp Vault](https://medium.com/@afdulrohmat03/how-to-secure-secret-data-in-spring-boot-using-hashicorp-vault-e1b37c269a15).
+The existing development JPA setting is `ddl-auto: create`: application-managed tables are recreated on startup. Use a disposable development database. The production setting remains `update`.
 
-Use this repository's `compose.vault.yml`, container name `spotify_clone_vault`, and the paths and key names below when following the walkthrough. The app imports configuration from Vault at `http://localhost:8200` through `spring.config.import: vault://` and uses token authentication. The [local Vault UI](http://localhost:8200) is available at the same address. Supply the token through `SPRING_CLOUD_VAULT_TOKEN` rather than placing it in `application.yaml`.
+The application no longer depends on Vault or uses a Vault token. `vault.hcl`, `compose.vault.yml`, and existing `vault-data/` are retained for optional separate use.
 
-1. Start Vault with `docker compose -f compose.vault.yml up -d`.
-2. Open the Vault UI. For a new `vault-data` directory, initialize Vault and securely save the unseal keys and initial root token. Skip initialization if Vault is already initialized.
-3. Unseal Vault using the number of distinct keys required by your configured threshold. The default is 3 of 5 keys. Log in to the UI with the initial root token for setup.
-4. If the `secret/` mount does not exist, enable a **KV** secrets engine at `secret` (KV v2 for a new setup).
-5. Under that mount, create the `auth-db` and `cre-storage` entries with the exact keys listed below. If they already exist, check their keys instead of recreating them.
-6. Set `SPRING_CLOUD_VAULT_TOKEN` to a token authorized to read these entries before running the app or tests. Use the root token only for local testing; use a dedicated application token for shared environments.
+## Production / Docker
 
-### Application keys
+Activate `prod` with `SPRING_PROFILES_ACTIVE=prod` or `--spring.profiles.active=prod`. Supply `DB_URL`, `DB_USER`, `DB_PASSWORD`, and all four R2 variables through `.env` or the deployment environment. Use a PostgreSQL JDBC URL, such as `jdbc:postgresql://host:5432/database`.
 
-The configured Vault backend is `secret`, with `application-name: auth-db,cre-storage`. These are logical KV paths; enter `auth-db` and `cre-storage` as entry names inside the `secret/` mount.
+The Docker image already selects `prod`. Pass configuration at runtime:
 
-| Vault path | Key | Purpose | App fallback |
-| --- | --- | --- | --- |
-| `secret/auth-db` | `database.devUser` | PostgreSQL username | `postgres` |
-| `secret/auth-db` | `database.devPassword` | PostgreSQL password | `postgres` |
-| `secret/cre-storage` | `r2.account-id` | Cloudflare account ID | Required; no fallback |
-| `secret/cre-storage` | `r2.access-key` | R2 S3 Access Key ID | Required; no fallback |
-| `secret/cre-storage` | `r2.secret-key` | R2 S3 Secret Access Key | Required; no fallback |
+```bash
+docker build -t spotify-clone-be .
+docker run --rm --env-file .env -p 10000:10000 spotify-clone-be
+```
 
-Document key names and placeholders only. Keep actual credentials, Vault tokens, and unseal keys out of README and Git. `.env` and `/vault-data/` are already ignored by this repository.
-
-> [!NOTE]
-> These 5 application keys are separate from Vault's unseal keys. Vault data persists in `./vault-data`; after a Vault restart, unseal it again before starting the app. The supplied `vault.hcl` disables TLS for local development; enable TLS before using Vault outside that setup.
-
-Reference: [Vault initialization and default key threshold](https://developer.hashicorp.com/vault/docs/commands/operator/init).
+For Docker, set `DB_URL` to a database host reachable from the container. If you set `PORT`, update the port mapping accordingly.
 
 ## Cloudflare R2 setup
 
-Follow the official Cloudflare guides:
+Create an R2 bucket and credentials for it, then put the account ID, S3 Access Key ID, Secret Access Key, and bucket name in `.env`. The app builds the endpoint as `https://<account-id>.r2.cloudflarestorage.com` with region `auto`.
+
+References:
 
 - [Get started with R2](https://developers.cloudflare.com/r2/get-started/)
 - [Create an R2 bucket](https://developers.cloudflare.com/r2/buckets/create-buckets/)
 - [Create R2 API credentials and find your account ID](https://developers.cloudflare.com/r2/api/tokens/)
 
-Create a bucket for your track objects, then create R2 credentials scoped to that bucket. **Object Read only** is sufficient for the current presigned download flow; choose **Object Read & Write** if those credentials will also upload objects.
-
-Save the credentials in Vault at `secret/cre-storage`:
-
-```json
-{
-  "r2.account-id": "<cloudflare-account-id>",
-  "r2.access-key": "<r2-access-key-id>",
-  "r2.secret-key": "<r2-secret-access-key>"
-}
-```
-
-Use the generated S3 **Access Key ID** and **Secret Access Key** for the last two values. The app builds the S3 endpoint as `https://<account-id>.r2.cloudflarestorage.com` and uses region `auto`. Use your bucket name and an existing object key when requesting a presigned download URL.
-
 ## Development commands
 
-PostgreSQL and an unsealed, configured Vault must be running, and `SPRING_CLOUD_VAULT_TOKEN` must be set for tests.
+The application context test requires a running PostgreSQL instance and configured R2 settings. Vault is not required.
 
 ```bash
-# Run tests
+# Run all tests
 mvn "-Duser.timezone=UTC" test
+
+# Run configuration tests without PostgreSQL or R2 access
+mvn -Dtest=EnvironmentConfigurationTests test
 
 # Build without running tests
 mvn clean package -DskipTests
 
 # Stop PostgreSQL; keep its data volume
 docker compose -f compose.db.yml down
-
-# Stop Vault; keep ./vault-data (unseal again after restarting)
-docker compose -f compose.vault.yml down
 ```

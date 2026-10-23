@@ -2,9 +2,9 @@ spring:
   application:
     name: spotify-clone-be
 
-  cloud:
-    vault:
-      enabled: false
+#  cloud:
+#    vault:
+#      enabled: false
 
   datasource:
     url: ${DB_URL}
