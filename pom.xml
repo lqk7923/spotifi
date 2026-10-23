@@ -28,6 +28,11 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <!-- Security patches ahead of the Spring Boot 4.1.1 managed versions. -->
+        <jackson-2-bom.version>2.21.8</jackson-2-bom.version>
+        <jackson-bom.version>3.1.8</jackson-bom.version>
+        <tomcat.version>11.0.27</tomcat.version>
+        <postgresql.version>42.7.14</postgresql.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -49,6 +54,13 @@
         <dependency>
             <groupId>software.amazon.awssdk</groupId>
             <artifactId>s3</artifactId>
+            <exclusions>
+                <!-- R2 uses the synchronous Apache5 transport; Netty is unused. -->
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
