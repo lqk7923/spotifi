@@ -4,6 +4,7 @@ import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
 import axo.spotifyclone.spotifyclonebe.dto.response.AlbumDataResponse;
 import axo.spotifyclone.spotifyclonebe.dto.projection.TrackFullDataProjection;
 import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDataProjection;
+import axo.spotifyclone.spotifyclonebe.exceptions.TrackNotFoundException;
 import axo.spotifyclone.spotifyclonebe.repository.AlbumRepository;
 import axo.spotifyclone.spotifyclonebe.service.AlbumService;
 import lombok.AllArgsConstructor;
@@ -20,10 +21,10 @@ public class AlbumServiceImplement implements AlbumService {
     private final CloudflareR2Client cloudflareR2Client;
 
     @Override
-    public AlbumDataResponse getAlbumData(UUID albumId) {
+    public AlbumDataResponse getAlbumData(UUID albumId){
         List<TrackFullDataProjection> listTrackData = albumRepository.findByAlbumId(albumId);
         if(listTrackData.isEmpty())
-            throw new RuntimeException("Album isn't exist");
+            throw new TrackNotFoundException("Album isn't exist");
         TrackFullDataProjection firstTrackFullInfo = listTrackData.getFirst();
         return AlbumDataResponse.builder()
                 .author(firstTrackFullInfo.getAuthor())

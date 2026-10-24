@@ -4,6 +4,7 @@ import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
 import axo.spotifyclone.spotifyclonebe.dto.projection.TrackInfoProjection;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
+import axo.spotifyclone.spotifyclonebe.exceptions.TrackNotFoundException;
 import axo.spotifyclone.spotifyclonebe.repository.TrackRepository;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ public class TrackServiceImplement implements TrackService {
     public TrackPresignedLink generatePresignedDownloadUrl(UUID objectId, Duration expiration) {
         TrackInfoProjection objectKey = trackRepository
                 .findTrackKeyById(objectId)
-                .orElseThrow(() -> new RuntimeException("Track not found"));
+                .orElseThrow(() -> new TrackNotFoundException("Track not found"));
 
         return TrackPresignedLink.builder()
                 .coverPresignedLink(cloudflareR2Client.presignedGetObjectRequest(expiration, objectKey.getCoverKey()))
