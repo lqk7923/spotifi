@@ -19,7 +19,7 @@ import java.util.UUID;
 public class TrackController {
     private final TrackService trackService;
 
-    @GetMapping("/track/{id}")
+    @GetMapping("/{id}")
     public TrackPresignedLink getTrackPresignedLink(
         @PathVariable UUID id
     ){
