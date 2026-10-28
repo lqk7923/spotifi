@@ -2,11 +2,11 @@ package axo.spotifyclone.spotifyclonebe.exceptions;
 
 import java.util.UUID;
 
-public class TrackNotFoundException extends RuntimeException{
-    public TrackNotFoundException(String id){
+public class ResourceNotFoundException extends RuntimeException{
+    public ResourceNotFoundException(String id){
         super(id + " not found");
     }
-    public TrackNotFoundException(UUID id){
+    public ResourceNotFoundException(UUID id){
         super(id.toString() + " not found");
     }
 }
