@@ -1,33 +1,44 @@
 package axo.spotifyclone.spotifyclonebe.controller;
 
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
+import axo.spotifyclone.spotifyclonebe.dto.response.ApiResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.PageResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackDetailsResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackPlaybackResponse;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.CacheControl;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/track")
+@RequestMapping("/tracks")
 @RequiredArgsConstructor
 public class TrackController {
     private final TrackService trackService;
 
-    @GetMapping("/{id}")
-    public TrackPresignedLink getTrackPresignedLink(
-        @PathVariable UUID id
+    @GetMapping("/{id}/playback")
+    public ResponseEntity<ApiResponse<TrackPlaybackResponse>> getTrackPresignedLink(
+            @PathVariable UUID id,
+            @RequestParam(defaultValue = "") String include
     ){
-        return trackService.generatePresignedDownloadUrl(id, Duration.ofMinutes(2));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(new ApiResponse<>(trackService.getPlayback(id, include)));
     }
 
-    @GetMapping("/all")
-    public List<TrackDataResponse> getTracksList(){
-        return trackService.listTracksInfo();
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<TrackDetailsResponse>> getTrackData(@PathVariable UUID id){
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(new ApiResponse<>(trackService.getTrackData(id)));
+    }
+
+    @GetMapping("")
+    public ResponseEntity<PageResponse<TrackDetailsResponse>> getTracksList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ){
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore())
+                .body(trackService.listTracksInfo(page, size));
     }
 }
