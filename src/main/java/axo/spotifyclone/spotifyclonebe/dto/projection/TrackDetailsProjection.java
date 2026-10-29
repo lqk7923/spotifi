@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 @Getter
 @AllArgsConstructor
-public class TrackFullDataProjection {
+public class TrackDetailsProjection {
     private UUID trackId;
     private String trackTitle;
     private Long trackDuration;
@@ -19,4 +19,5 @@ public class TrackFullDataProjection {
     private UUID albumId;
     private String albumCoverKey;
     private LocalDate albumReleaseDate;
+    private String trackKey;
 }
