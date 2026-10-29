@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import java.security.SecureRandom;
 
-@Component
+//@Component
 public class Base62IdGenerator {
 
     private static final String ALPHABET =
