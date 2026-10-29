@@ -2,6 +2,8 @@
 
 Java 21, Spring Boot, PostgreSQL, and Cloudflare R2. Run all commands from the project root. Requires JDK 21, Maven, Docker Compose, and R2 credentials.
 
+See [API contract](docs/api.md) for endpoints, response fields, pagination, and playback metadata.
+
 ## Quick setup
 
 Copy `.env.example` to `.env` and fill in the database and R2 settings. If you already have a `.env`, add the missing settings from `.env.example` instead of overwriting it.

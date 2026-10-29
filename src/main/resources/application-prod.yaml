@@ -52,5 +52,7 @@ r2-storage:
   bucket-name: ${R2_BUCKET_NAME}
 
 app:
+  media:
+    url-expiration: ${MEDIA_URL_EXPIRATION:PT2M}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:}
