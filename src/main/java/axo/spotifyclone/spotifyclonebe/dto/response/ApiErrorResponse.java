@@ -6,5 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class ApiErrorResponse {
-    private ErrorMessage error;
+    private String code;
+    private String message;
 }
