@@ -1,21 +1,15 @@
 package axo.spotifyclone.spotifyclonebe.service;
 
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
+import axo.spotifyclone.spotifyclonebe.dto.response.PageResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackDetailsResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackPlaybackResponse;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 public interface TrackService {
-    /**
-     * Generate a get presigned link
-     */
-    TrackPresignedLink generatePresignedDownloadUrl(UUID objectKey, Duration expiration);
+    TrackPlaybackResponse getPlayback(UUID trackId, String include);
 
-    /**
-    * Lists all track's information in system
-    */
-    List<TrackDataResponse> listTracksInfo();
+    TrackDetailsResponse getTrackData(UUID trackId);
 
+    PageResponse<TrackDetailsResponse> listTracksInfo(int page, int size);
 }

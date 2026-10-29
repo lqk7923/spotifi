@@ -1,5 +1,6 @@
 package axo.spotifyclone.spotifyclonebe.component;
 
+import axo.spotifyclone.spotifyclonebe.dto.storage.PresignedUrl;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -76,7 +77,7 @@ public class CloudflareR2Client {
     /**
      * Generate a get presigned link
      */
-    public String presignedGetObjectRequest(Duration expiration, String objectKey){
+    public PresignedUrl presignedGetObjectRequest(Duration expiration, String objectKey){
         GetObjectPresignRequest objectPresignRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(expiration)
                 .getObjectRequest(builder -> builder
@@ -84,6 +85,7 @@ public class CloudflareR2Client {
                         .key(objectKey)
                         .build())
                 .build();
-        return this.getPresigner().presignGetObject(objectPresignRequest).url().toString();
+        PresignedGetObjectRequest presignedGetObjectRequest = this.getPresigner().presignGetObject(objectPresignRequest);
+        return new PresignedUrl(presignedGetObjectRequest.url().toString(), presignedGetObjectRequest.expiration());
     }
 }

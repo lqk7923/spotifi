@@ -21,22 +21,14 @@ public interface TrackRepository extends JpaRepository<Track, UUID> {
     @Query("Select new axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection( " +
             "t.trackId, t.trackTitle, t.trackDuration, t.author, " +
             "a.albumTitle, t.albumId, a.albumCoverKey, a.albumReleaseDate, t.trackKey) " +
-            "from Track t left join Album a on t.albumId = a.albumId " +
+            "from Track t join Album a on t.albumId = a.albumId " +
             "where t.trackId = :trackId")
     Optional<TrackDetailsProjection> findDetailsByTrackId(@Param("trackId") UUID trackId);
 
     @Query(value = "Select new axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection( " +
             "t.trackId, t.trackTitle, t.trackDuration, t.author, " +
             "a.albumTitle, t.albumId, a.albumCoverKey, a.albumReleaseDate, t.trackKey) " +
-            "from Track t left join Album a on t.albumId = a.albumId order by t.trackId",
-            countQuery = "Select count(t) from Track t")
+            "from Track t join Album a on t.albumId = a.albumId order by t.trackId",
+            countQuery = "Select count(t) from Track t join Album a on t.albumId = a.albumId")
     Page<TrackDetailsProjection> findAllDetails(Pageable pageable);
-
-    @Query(value = "Select new axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection( " +
-            "t.trackId, t.trackTitle, t.trackDuration, t.author, " +
-            "a.albumTitle, t.albumId, a.albumCoverKey, a.albumReleaseDate, t.trackKey) " +
-            "from Track t left join Album a on t.albumId = a.albumId " +
-            "where t.albumId = :albumId order by t.trackId",
-            countQuery = "Select count(t) from Track t where t.albumId = :albumId")
-    Page<TrackDetailsProjection> findDetailsByAlbumId(@Param("albumId") UUID albumId, Pageable pageable);
 }

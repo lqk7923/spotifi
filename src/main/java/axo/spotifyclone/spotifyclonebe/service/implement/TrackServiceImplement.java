@@ -1,53 +1,82 @@
 package axo.spotifyclone.spotifyclonebe.service.implement;
 
-import axo.spotifyclone.spotifyclonebe.component.CloudflareR2Client;
-import axo.spotifyclone.spotifyclonebe.dto.projection.TrackInfoProjection;
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackDataResponse;
-import axo.spotifyclone.spotifyclonebe.dto.response.TrackPresignedLink;
-import axo.spotifyclone.spotifyclonebe.exceptions.TrackNotFoundException;
+import axo.spotifyclone.spotifyclonebe.component.PaginationRequestFactory;
+import axo.spotifyclone.spotifyclonebe.dto.storage.PresignedUrl;
+import axo.spotifyclone.spotifyclonebe.mapper.TrackResponseMapper;
+import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection;
+import axo.spotifyclone.spotifyclonebe.dto.projection.TrackPlaybackSourceProjection;
+import axo.spotifyclone.spotifyclonebe.dto.response.PageResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackDetailsResponse;
+import axo.spotifyclone.spotifyclonebe.dto.response.TrackPlaybackResponse;
+import axo.spotifyclone.spotifyclonebe.exceptions.BadRequestException;
+import axo.spotifyclone.spotifyclonebe.exceptions.CustomException;
+import axo.spotifyclone.spotifyclonebe.exceptions.ResourceNotFoundException;
 import axo.spotifyclone.spotifyclonebe.repository.TrackRepository;
+import axo.spotifyclone.spotifyclonebe.service.MediaUrlService;
 import axo.spotifyclone.spotifyclonebe.service.TrackService;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TrackServiceImplement implements TrackService {
-
-    private final CloudflareR2Client cloudflareR2Client;
+    private final MediaUrlService mediaUrlService;
     private final TrackRepository trackRepository;
+    private final TrackResponseMapper trackResponseMapper;
+    private final PaginationRequestFactory paginationRequestFactory;
 
-    public TrackPresignedLink generatePresignedDownloadUrl(UUID objectId, Duration expiration) {
-        TrackInfoProjection objectKey = trackRepository
-                .findTrackKeyById(objectId)
-                .orElseThrow(() -> new TrackNotFoundException("Track not found"));
+    @Override
+    @Transactional(readOnly = true)
+    public TrackPlaybackResponse getPlayback(UUID trackId, String include){
+        boolean isIncludeMetaData = isIncludeMetaData(include);
 
-        return TrackPresignedLink.builder()
-                .coverPresignedLink(cloudflareR2Client.presignedGetObjectRequest(expiration, objectKey.getCoverKey()))
-                .trackPresignedLink(cloudflareR2Client.presignedGetObjectRequest(expiration, objectKey.getTrackKey()))
+        if(isIncludeMetaData) {
+            TrackDetailsProjection track = trackRepository.findDetailsByTrackId(trackId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Track", trackId));
+            return buildPlaybackResponse(trackId, track.getTrackKey(), trackResponseMapper.toResponse(track));
+        }
+
+        TrackPlaybackSourceProjection track = trackRepository.findPlaybackSourceByTrackId(trackId)
+                .orElseThrow(() -> new ResourceNotFoundException("Track", trackId));
+        return buildPlaybackResponse(trackId, track.getTrackKey(), null);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TrackDetailsResponse getTrackData(UUID trackId){
+        return trackRepository.findDetailsByTrackId(trackId)
+                .map(trackResponseMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("Track", trackId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<TrackDetailsResponse> listTracksInfo(int page, int size){
+        return PageResponse.from(trackRepository.findAllDetails(paginationRequestFactory.create(page, size))
+                .map(trackResponseMapper::toResponse));
+    }
+
+    private TrackPlaybackResponse buildPlaybackResponse(UUID trackId, String trackKey, TrackDetailsResponse metadata){
+        if(trackKey == null || trackKey.isBlank()){
+            throw new CustomException("Track " + trackId + " has no audio source.");
+        }
+
+        PresignedUrl presignedTrackUrl = mediaUrlService.generateUrl(trackKey);
+
+        return TrackPlaybackResponse.builder()
+                .trackId(trackId)
+                .audioUrl(presignedTrackUrl.getUrl())
+                .expiresAt(presignedTrackUrl.getExpiration())
+                .metadata(metadata)
                 .build();
     }
 
-    /**
-     * Lists all track's information in system
-     */
-    @Override
-    public List<TrackDataResponse> listTracksInfo() {
-        return trackRepository.findAllTracksInfo()
-                .stream()
-                .map(track -> TrackDataResponse.builder()
-                        .trackId(String.valueOf(track.getTrackId()))
-                        .trackDuration(track.getTrackDuration())
-                        .trackTitle(track.getTrackTitle())
-                        .author(track.getAuthor())
-                        .albumTitle(track.getAlbumTitle())
-                        .albumId(String.valueOf(track.getAlbumId()))
-                        .coverPresignedUrl(cloudflareR2Client.presignedGetObjectRequest(Duration.ofMinutes(2), track.getAlbumCoverKey()))
-                        .build())
-                .toList();
+    private boolean isIncludeMetaData(String include){
+        if(include == null || include.isEmpty()) return false;
+        if (include.equals("metadata")) return true;
+        throw new BadRequestException("Include must be omitted or set to 'metadata'.");
     }
 }
