@@ -1,22 +1,21 @@
 package axo.spotifyclone.spotifyclonebe.dto.response;
 
-import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDataProjection;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Builder
 @Getter
 @AllArgsConstructor
 public class AlbumDataResponse {
-    private List<TrackDataProjection> albumTracks;
-    private String author;
-    private String albumTitle;
     private UUID albumId;
-    private String albumCoverPresignedUrl;
+    private String title;
+    private String artist;
+    private String coverUrl;
+    private Instant coverExpiresAt;
     private LocalDate releaseDate;
 }

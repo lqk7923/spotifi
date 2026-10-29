@@ -4,15 +4,19 @@ import lombok.Builder;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.time.Instant;
+import java.util.UUID;
+
 @Builder
 @Getter
 @AllArgsConstructor
 public class TrackDataResponse {
-    private String trackId;
-    private String trackTitle;
-    private Long trackDuration;
-    private String author;
+    private UUID trackId;
+    private String title;
+    private Long durationMs;
+    private String artist;
     private String albumTitle;
-    private String albumId;
-    private String coverPresignedUrl;
+    private UUID albumId;
+    private String coverUrl;
+    private Instant coverExpiresAt;
 }
