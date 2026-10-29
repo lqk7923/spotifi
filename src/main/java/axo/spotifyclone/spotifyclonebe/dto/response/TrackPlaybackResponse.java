@@ -11,10 +11,10 @@ import java.util.UUID;
 @Getter
 @Builder
 @AllArgsConstructor
-public class TrackPresignedLink {
+public class TrackPlaybackResponse {
     private UUID trackId;
     private String audioUrl;
     private Instant expiresAt;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private TrackDataResponse metadata;
+    private TrackDetailsResponse metadata;
 }

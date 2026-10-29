@@ -10,7 +10,7 @@ import java.util.UUID;
 @Builder
 @Getter
 @AllArgsConstructor
-public class TrackDataResponse {
+public class TrackDetailsResponse {
     private UUID trackId;
     private String title;
     private Long durationMs;

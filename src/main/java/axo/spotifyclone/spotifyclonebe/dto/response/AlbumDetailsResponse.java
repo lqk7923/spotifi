@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @Getter
 @AllArgsConstructor
-public class AlbumDataResponse {
+public class AlbumDetailsResponse {
     private UUID albumId;
     private String title;
     private String artist;
