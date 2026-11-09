@@ -6,18 +6,21 @@ All property names, error codes, and application-generated messages use English.
 
 | Method | Path | Response | Access |
 | --- | --- | --- | --- |
-| GET | `/tracks?page=0&size=20` | Paginated track metadata | Public |
+| GET | `/tracks?q=hello&page=0&size=20` | Paginated track metadata with optional search | Public |
 | GET | `/tracks/{id}` | Track metadata | Bearer token |
 | GET | `/tracks/{id}/playback` | Audio URL and expiration | Bearer token |
 | GET | `/tracks/{id}/playback?include=metadata` | Audio URL, expiration, and track metadata | Bearer token |
+| GET | `/albums?q=hello&page=0&size=20` | Paginated album metadata with optional search | Bearer token |
 | GET | `/albums/{albumId}` | Album metadata | Bearer token |
-| GET | `/albums/{albumId}/tracks` | All track metadata for an album | Bearer token |
+| GET | `/albums/{albumId}/tracks?page=0&size=20` | Paginated track metadata for an album | Bearer token |
 
-Pagination applies only to `/tracks`. Pages start at 0. The default size is 20; the maximum size is 20. Invalid pagination values return 400. Lists have a fixed order by track ID; there is no configurable sorting parameter. A page beyond the last page returns an empty list.
+The track and album collection endpoints use `q` to match any part of a title or artist name, ignoring case and surrounding whitespace. Omitting `q` or providing a blank value lists the collection. Characters such as `%` and `_` match literally.
 
-`/albums/{albumId}/tracks` returns all tracks wrapped in `data`, without pagination metadata or `page`/`size` parameters. The repository uses one query starting from `Album` with a left join to `Track`. An existing album with no tracks returns `{ "data": [] }`, while a missing album returns 404. There is no separate existence or count query for this endpoint.
+Pages start at 0. The default size is 20, and `size` accepts values from 1 to 20. Invalid pagination values return 400. Tracks and albums are ordered by their respective IDs. A search with no matches or a page beyond the last page returns an empty `data` array.
 
-Every track must belong to an existing album. Track detail and paginated list queries use inner joins to albums, with the same join in the pagination count query. The album tracks query retains its left join because an album can exist without tracks. Playback without metadata reads only the track's audio key and does not need an album join.
+`/albums/{albumId}/tracks` uses the same `page` and `size` parameters and returns `data` and `pagination`. An existing album with no tracks returns an empty page with `totalElements` and `totalPages` both set to 0. A missing album returns 404.
+
+Every track must belong to an existing album. Track detail and paginated track queries use inner joins to albums, with the same join in the pagination count queries. When the album tracks query counts zero tracks, the service checks whether the album exists. Playback without metadata reads only the track's audio key.
 
 Playback accepts only an omitted/empty `include` or `include=metadata`; other values return 400. Without metadata, playback reads only the track's audio object key. With metadata, one repository query retrieves both the source and metadata.
 
@@ -106,7 +109,7 @@ Fetch a new URL before its expiration. The expiration of a cover URL is independ
 - Replace `trackDuration` with `durationMs`, and `author` with `artist`.
 - Replace the previous cover URL names with `coverUrl`; read its expiration from `coverExpiresAt`.
 - Replace `trackPresignedLink` with `audioUrl` and read `expiresAt`. A playback response has no standalone cover URL; request metadata or reuse existing track metadata.
-- Read album details from `/albums/{albumId}`; `/albums/{albumId}/tracks` returns the complete track list in `data`, without `pagination`.
+- Read album details from `/albums/{albumId}` and request each page of tracks from `/albums/{albumId}/tracks`.
 - Replace numeric `errorCode` handling with `code` and read the message from `message`. Errors use a single `ApiErrorResponse` object without an `error` wrapper.
 
 This refactor does not change the database schema or add track-number ordering.

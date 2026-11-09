@@ -1,6 +1,7 @@
 package axo.spotifyclone.spotifyclonebe.service.implement;
 
 import axo.spotifyclone.spotifyclonebe.component.PaginationRequestFactory;
+import axo.spotifyclone.spotifyclonebe.component.SearchQueryFactory;
 import axo.spotifyclone.spotifyclonebe.dto.storage.PresignedUrl;
 import axo.spotifyclone.spotifyclonebe.mapper.TrackResponseMapper;
 import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection;
@@ -27,6 +28,7 @@ public class TrackServiceImplement implements TrackService {
     private final TrackRepository trackRepository;
     private final TrackResponseMapper trackResponseMapper;
     private final PaginationRequestFactory paginationRequestFactory;
+    private final SearchQueryFactory searchQueryFactory;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,8 +56,9 @@ public class TrackServiceImplement implements TrackService {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<TrackDetailsResponse> listTracksInfo(int page, int size){
-        return PageResponse.from(trackRepository.findAllDetails(paginationRequestFactory.create(page, size))
+    public PageResponse<TrackDetailsResponse> searchTracks(String query, int page, int size){
+        String pattern = searchQueryFactory.createPattern(query);
+        return PageResponse.from(trackRepository.searchDetails(pattern, paginationRequestFactory.create(page, size))
                 .map(trackResponseMapper::toResponse));
     }
 

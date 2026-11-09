@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaginationRequestFactory {
     public PageRequest create(int page, int size){
+        if(page < 0){
+            throw new BadRequestException("Page must be greater than or equal to 0.");
+        }
         if(size < 1 || size > 20){
             throw new BadRequestException("Size must be between 1 and 20.");
         }

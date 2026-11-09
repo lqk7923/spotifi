@@ -35,10 +35,11 @@ public class TrackController {
 
     @GetMapping("")
     public ResponseEntity<PageResponse<TrackDetailsResponse>> getTracksList(
+            @RequestParam(required = false) String q,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ){
         return ResponseEntity.ok().cacheControl(CacheControl.noStore())
-                .body(trackService.listTracksInfo(page, size));
+                .body(trackService.searchTracks(q, page, size));
     }
 }

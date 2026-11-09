@@ -21,8 +21,8 @@ public class TrackResponseMapper {
                 .artist(track.getAuthor())
                 .albumTitle(track.getAlbumTitle())
                 .albumId(track.getAlbumId())
-                .coverUrl(presignedCoverUrl.getUrl())
-                .coverExpiresAt(presignedCoverUrl.getExpiration())
+                .coverUrl(presignedCoverUrl == null ? null : presignedCoverUrl.getUrl())
+                .coverExpiresAt(presignedCoverUrl == null ? null : presignedCoverUrl.getExpiration())
                 .build();
     }
 }

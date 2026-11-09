@@ -11,5 +11,5 @@ public interface TrackService {
 
     TrackDetailsResponse getTrackData(UUID trackId);
 
-    PageResponse<TrackDetailsResponse> listTracksInfo(int page, int size);
+    PageResponse<TrackDetailsResponse> searchTracks(String query, int page, int size);
 }
