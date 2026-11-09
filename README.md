@@ -58,7 +58,7 @@ Use plain, unquoted `KEY=value` lines, with comments on their own lines. Do not 
 
 Compose also reads `.env` automatically. Keep its PostgreSQL settings consistent with the app. Changing these variables does not change credentials or databases in an existing PostgreSQL volume.
 
-The existing development JPA setting is `ddl-auto: create`: application-managed tables are recreated on startup. Use a disposable development database. The production setting remains `update`.
+Development and production use `ddl-auto: update`. Hibernate creates and updates tables from the JPA entities on startup, including `app_user` from `AppUser`.
 
 The application no longer depends on Vault or uses a Vault token. `vault.hcl`, `compose.vault.yml`, and existing `vault-data/` are retained for optional separate use.
 
@@ -86,6 +86,8 @@ References:
 - [Create R2 API credentials and find your account ID](https://developers.cloudflare.com/r2/api/tokens/)
 
 ## Development commands
+
+User mapping tests run with H2 in PostgreSQL compatibility mode by default and generate their schema from the entities using `create-drop`. To run against PostgreSQL, set `USER_MAPPING_TEST_DB_URL`, `USER_MAPPING_TEST_DB_USER`, and `USER_MAPPING_TEST_DB_PASSWORD` to a dedicated disposable PostgreSQL test database and run `mvn -Dtest=UserMappingTests test`. These tests recreate the entity tables and drop them when the test context closes.
 
 The application context test requires a running PostgreSQL instance and configured R2 settings. Vault is not required.
 

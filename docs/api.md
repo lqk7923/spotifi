@@ -1,11 +1,12 @@
 # API contract
 
-All property names, error codes, and application-generated messages use English. IDs are UUID strings. Track durations use milliseconds. Release dates use `YYYY-MM-DD`; URL expiration timestamps use UTC ISO 8601.
+All property names, error codes, and application-generated messages use English. Track and album IDs are UUID strings. User IDs are Keycloak subject strings. Track durations use milliseconds. Release dates use `YYYY-MM-DD`; URL expiration timestamps use UTC ISO 8601.
 
 ## Endpoints
 
 | Method | Path | Response | Access |
 | --- | --- | --- | --- |
+| GET | `/users/me` | Current user's stored ID, username, and email | Bearer token |
 | GET | `/tracks?q=hello&page=0&size=20` | Paginated track metadata with optional search | Public |
 | GET | `/tracks/{id}` | Track metadata | Bearer token |
 | GET | `/tracks/{id}/playback` | Audio URL and expiration | Bearer token |
@@ -25,6 +26,22 @@ Every track must belong to an existing album. Track detail and paginated track q
 Playback accepts only an omitted/empty `include` or `include=metadata`; other values return 400. Without metadata, playback reads only the track's audio object key. With metadata, one repository query retrieves both the source and metadata.
 
 ## Success responses
+
+Authenticated JWT requests insert the current user into `app_user` when its ID is first encountered. The configured Keycloak issuer supplies `sub` as `id`, `preferred_username` as `username`, and `email` as `email`. IDs are stored as strings to support Keycloak's subject format. Username and email can be null when the corresponding claims are absent. Existing users retain the profile saved on first insertion. The insert uses `on conflict do nothing` with the ID primary key so repeated requests for the same ID reuse the existing record.
+
+`GET /users/me` returns the stored profile with `Cache-Control: no-store`.
+
+```json
+{
+  "data": {
+    "id": "743360a4-07d9-4356-b75c-65517b48229a",
+    "username": "listener",
+    "email": "listener@example.com"
+  }
+}
+```
+
+Enable the Keycloak `profile` and `email` client scopes and include their claims in access tokens. Synchronization runs on requests with validated bearer tokens, including public routes when a token is supplied. Anonymous requests do not create users. This maps users from the single issuer configured for this backend. Synchronization failures return 500 and stop request processing.
 
 A single resource is wrapped in `data`:
 
