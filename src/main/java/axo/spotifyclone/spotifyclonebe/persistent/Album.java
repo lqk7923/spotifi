@@ -1,6 +1,8 @@
 package axo.spotifyclone.spotifyclonebe.persistent;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Entity;
 import lombok.Data;
@@ -33,4 +35,7 @@ public class Album {
     private String albumTitle;
 
     private String albumCoverKey;
+
+    @Enumerated(EnumType.STRING)
+    private AlbumType albumType;
 }

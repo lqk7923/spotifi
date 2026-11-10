@@ -1,14 +1,14 @@
 
-INSERT INTO album(album_id, album_author, album_title, album_cover_key, album_release_date)
+INSERT INTO album(album_id, album_author, album_title, album_cover_key, album_release_date, album_type)
 values
-    ('9e6c7ab6-e760-4abb-986b-99bff71802f2'::uuid,'looplicator','Industrial Drum','track_cover/industrial_drums.jpg', date '2026-01-02'),
-    ('cc32a6e3-e401-4800-9c09-01a71d9f83da'::uuid,'josefpres','Piano and Music','track_cover/piano_and_music.jpg',date '2026-10-24'),
-    ('43840c7c-2fa0-4252-b254-ef0e0e767cc4'::uuid,'joanne_pang','Peaceful Harp','track_cover/peaceful_harp.jpg',date '2026-5-10'),
-    ('0588e9e9-2b5a-4071-a254-2a5c7b41208d'::uuid,'theojt','Peaceful Ambiance','track_cover/peaceful_ambiance.jpg', date '2026-07-25'),
-    ('743360a4-07d9-4356-b75c-65517b48229a'::uuid,'youngrich89','Calm Night','track_cover/calm_night_x_hal_jordan.jpg', date '2026-10-05' ),
-    ('4c051112-0da8-4951-b1cf-27b8e67edd57'::uuid,'seth makes sounds','Summer Has No Tomorrow','track_cover/summer_has_no_tomorrow.jpg', date '2026-10-14' ),
-    ('baef7ba0-8a01-4e6e-8444-efe3d276e263'::uuid,'fredericfont','Puckr Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14' ),
-    ('c07112d5-334b-41c3-95a7-6df3da5d9b46'::uuid,'x1shi','Seamless Game Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14' );
+    ('9e6c7ab6-e760-4abb-986b-99bff71802f2'::uuid,'looplicator','Industrial Drum','track_cover/industrial_drums.jpg', date '2026-01-02', 'SINGLE'),
+    ('cc32a6e3-e401-4800-9c09-01a71d9f83da'::uuid,'josefpres','Piano and Music','track_cover/piano_and_music.jpg',date '2026-10-24', 'EP'),
+    ('43840c7c-2fa0-4252-b254-ef0e0e767cc4'::uuid,'joanne_pang','Peaceful Harp','track_cover/peaceful_harp.jpg',date '2026-5-10', 'SINGLE'),
+    ('0588e9e9-2b5a-4071-a254-2a5c7b41208d'::uuid,'theojt','Peaceful Ambiance','track_cover/peaceful_ambiance.jpg', date '2026-07-25', 'SINGLE'),
+    ('743360a4-07d9-4356-b75c-65517b48229a'::uuid,'youngrich89','Calm Night','track_cover/calm_night_x_hal_jordan.jpg', date '2026-10-05', 'SINGLE'),
+    ('4c051112-0da8-4951-b1cf-27b8e67edd57'::uuid,'seth makes sounds','Summer Has No Tomorrow','track_cover/summer_has_no_tomorrow.jpg', date '2026-10-14', 'SINGLE'),
+    ('baef7ba0-8a01-4e6e-8444-efe3d276e263'::uuid,'fredericfont','Puckr Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14', 'SINGLE'),
+    ('c07112d5-334b-41c3-95a7-6df3da5d9b46'::uuid,'x1shi','Seamless Game Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14', 'SINGLE');
 
 
     Insert into track(track_key, track_title, track_duration, author, album_id)

@@ -88,7 +88,7 @@ Playback without metadata:
 
 With `include=metadata`, the same playback object also contains `metadata`, using the track metadata fields shown above. When metadata is not requested, the property is omitted.
 
-Album metadata contains `albumId`, `title`, `artist`, `coverUrl`, `coverExpiresAt`, and `releaseDate`. Tracks are retrieved from the album tracks endpoint. `artist` in track metadata comes from the track; `artist` in album metadata comes from the album.
+Album metadata contains `albumId`, `title`, `artist`, `coverUrl`, `coverExpiresAt`, `releaseDate`, and `albumType`. The API returns the stored type, which can be `SINGLE` (1–3 tracks), `EP` (4–7 tracks), `LP` (8 or more tracks), or `null` if unset. Tracks are retrieved from the album tracks endpoint. Track metadata uses the track's artist, and album metadata uses the album's artist.
 
 Missing cover keys produce `coverUrl: null` and `coverExpiresAt: null`. An audio source must be present to return a successful playback response.
 

@@ -1,5 +1,6 @@
 package axo.spotifyclone.spotifyclonebe.dto.response;
 
+import axo.spotifyclone.spotifyclonebe.persistent.AlbumType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,4 +19,5 @@ public class AlbumDetailsResponse {
     private String coverUrl;
     private Instant coverExpiresAt;
     private LocalDate releaseDate;
+    private AlbumType albumType;
 }

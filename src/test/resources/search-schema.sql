@@ -3,7 +3,8 @@ CREATE TABLE IF NOT EXISTS album (
     album_author VARCHAR(255) NOT NULL,
     album_release_date DATE NOT NULL,
     album_title VARCHAR(255) NOT NULL,
-    album_cover_key VARCHAR(255)
+    album_cover_key VARCHAR(255),
+    album_type VARCHAR(255)
 );
 
 CREATE TABLE IF NOT EXISTS track (

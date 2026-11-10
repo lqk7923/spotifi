@@ -65,6 +65,7 @@ public class AlbumServiceImplement implements AlbumService {
                 .coverUrl(presignedCoverUrl == null ? null : presignedCoverUrl.getUrl())
                 .coverExpiresAt(presignedCoverUrl == null ? null : presignedCoverUrl.getExpiration())
                 .releaseDate(album.getAlbumReleaseDate())
+                .albumType(album.getAlbumType())
                 .build();
     }
 }

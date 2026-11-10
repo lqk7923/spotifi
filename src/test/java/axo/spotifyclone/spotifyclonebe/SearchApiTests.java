@@ -206,7 +206,24 @@ class SearchApiTests {
         mvc.perform(get("/albums").param("q", "Unrelated"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data", hasSize(1)))
-                .andExpect(jsonPath("$.data[0].albumId").value(id(4).toString()));
+                .andExpect(jsonPath("$.data[0].albumId").value(id(4).toString()))
+                .andExpect(jsonPath("$.data[0].albumType").doesNotExist());
+    }
+
+    @Test
+    void albumDetailsAllowMissingAlbumTypeForAlbumsWithTracks() throws Exception {
+        mvc.perform(get("/albums/" + id(1)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.albumType").doesNotExist());
+    }
+
+    @Test
+    void albumSearchReturnsStoredAlbumType() throws Exception {
+        jdbc.update("UPDATE album SET album_type = ? WHERE album_id = ?", "EP", id(4));
+
+        mvc.perform(get("/albums").param("q", "Unrelated"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].albumType").value("EP"));
     }
 
     @ParameterizedTest
