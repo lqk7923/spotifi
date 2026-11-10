@@ -7,6 +7,7 @@ All property names, error codes, and application-generated messages use English.
 | Method | Path | Response | Access |
 | --- | --- | --- | --- |
 | GET | `/users/me` | Current user's stored ID, username, and email | Bearer token |
+| GET | `/users/me/liked-music?page=0&size=20` | Paginated track metadata for the current user's liked music | Bearer token |
 | GET | `/tracks?q=hello&page=0&size=20` | Paginated track metadata with optional search | Public |
 | GET | `/tracks/{id}` | Track metadata | Bearer token |
 | GET | `/tracks/{id}/playback` | Audio URL and expiration | Bearer token |
@@ -20,6 +21,15 @@ The track and album collection endpoints use `q` to match any part of a title or
 Pages start at 0. The default size is 20, and `size` accepts values from 1 to 20. Invalid pagination values return 400. Tracks and albums are ordered by their respective IDs. A search with no matches or a page beyond the last page returns an empty `data` array.
 
 `/albums/{albumId}/tracks` uses the same `page` and `size` parameters and returns `data` and `pagination`. An existing album with no tracks returns an empty page with `totalElements` and `totalPages` both set to 0. A missing album returns 404.
+
+`GET /users/me/liked-music` gets the user ID from the authenticated JWT's `sub` claim; clients do not supply a user ID. It accepts `page` (default 0) and `size` (default 20, range 1–20). Results are ordered by liked-music ID descending and contain the same track metadata fields as `/tracks`, including signed cover URLs. Only likes whose track and album still exist are included, with the same filtering applied to pagination totals. A user with no matching likes receives an empty `data` array and zero totals; a page past the end returns an empty array while preserving totals. Invalid pagination returns 400, and a missing or invalid bearer token returns 401. Responses use `Cache-Control: no-store`.
+
+Example request:
+
+```http
+GET /users/me/liked-music?page=0&size=20
+Authorization: Bearer <access_token>
+```
 
 Every track must belong to an existing album. Track detail and paginated track queries use inner joins to albums, with the same join in the pagination count queries. When the album tracks query counts zero tracks, the service checks whether the album exists. Playback without metadata reads only the track's audio key.
 
@@ -127,6 +137,7 @@ Fetch a new URL before its expiration. The expiration of a cover URL is independ
 - Replace the previous cover URL names with `coverUrl`; read its expiration from `coverExpiresAt`.
 - Replace `trackPresignedLink` with `audioUrl` and read `expiresAt`. A playback response has no standalone cover URL; request metadata or reuse existing track metadata.
 - Read album details from `/albums/{albumId}` and request each page of tracks from `/albums/{albumId}/tracks`.
+- Fetch the signed-in user's liked tracks from `/users/me/liked-music?page=0&size=20` with their bearer token. Read tracks from `response.data` and totals from `response.pagination`.
 - Replace numeric `errorCode` handling with `code` and read the message from `message`. Errors use a single `ApiErrorResponse` object without an `error` wrapper.
 
 This refactor does not change the database schema or add track-number ordering.
