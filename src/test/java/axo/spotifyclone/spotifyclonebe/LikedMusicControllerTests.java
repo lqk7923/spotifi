@@ -10,6 +10,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.jwt.BadJwtException;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -22,6 +23,7 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest(properties = {
@@ -100,6 +102,49 @@ class LikedMusicControllerTests {
     void invalidTokensAreRejected() throws Exception {
         when(jwtDecoder.decode("invalid")).thenThrow(new BadJwtException("Invalid token"));
         mvc.perform(get("/users/me/liked-music").header("Authorization", "Bearer invalid"))
+                .andExpect(status().isUnauthorized());
+        verifyNoInteractions(likedMusicService);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"true", "false"})
+    void patchSetsTrackLikeForAuthenticatedUser(boolean liked) throws Exception {
+        authenticate();
+        var trackId = new UUID(0, 1);
+
+        mvc.perform(patch("/users/me/liked-music/{trackId}", trackId)
+                        .header("Authorization", "Bearer token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"liked\":" + liked + ",\"userId\":\"another-user\"}"))
+                .andExpect(status().isNoContent())
+                .andExpect(header().string("Cache-Control", "no-store"));
+
+        verify(likedMusicService).setTrackLiked("listener", trackId, liked);
+    }
+
+    @ParameterizedTest
+    @CsvSource(delimiter = '|', value = {
+            "invalid-uuid | {\"liked\":true}",
+            "00000000-0000-0000-0000-000000000001 | {}",
+            "00000000-0000-0000-0000-000000000001 | {\"liked\":null}"
+    })
+    void patchRejectsInvalidInput(String trackId, String body) throws Exception {
+        authenticate();
+
+        mvc.perform(patch("/users/me/liked-music/{trackId}", trackId)
+                        .header("Authorization", "Bearer token")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("BAD_REQUEST"));
+        verifyNoInteractions(likedMusicService);
+    }
+
+    @Test
+    void patchRequiresAuthentication() throws Exception {
+        mvc.perform(patch("/users/me/liked-music/{trackId}", new UUID(0, 1))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"liked\":true}"))
                 .andExpect(status().isUnauthorized());
         verifyNoInteractions(likedMusicService);
     }

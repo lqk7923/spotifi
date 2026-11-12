@@ -5,6 +5,7 @@ import axo.spotifyclone.spotifyclonebe.dto.projection.TrackDetailsProjection;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -20,4 +21,10 @@ public interface LikedMusicRepository extends JpaRepository<LikedMusic, UUID> {
             USER_TRACKS_FROM + " order by lm.id desc",
             countQuery = "select count(lm) " + USER_TRACKS_FROM)
     Page<TrackDetailsProjection> findTrackDetailsByUserId(@Param("userId") String userId, Pageable pageable);
+
+    boolean existsByUserIdAndTrackId(String userId, UUID trackId);
+
+    @Modifying
+    @Query("delete from LikedMusic lm where lm.userId = :userId and lm.trackId = :trackId")
+    void deleteLike(@Param("userId") String userId, @Param("trackId") UUID trackId);
 }

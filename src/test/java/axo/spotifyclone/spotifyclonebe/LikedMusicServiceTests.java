@@ -4,6 +4,7 @@ import axo.spotifyclone.spotifyclonebe.component.PaginationRequestFactory;
 import axo.spotifyclone.spotifyclonebe.dto.response.TrackDetailsResponse;
 import axo.spotifyclone.spotifyclonebe.dto.storage.PresignedUrl;
 import axo.spotifyclone.spotifyclonebe.exceptions.BadRequestException;
+import axo.spotifyclone.spotifyclonebe.exceptions.ResourceNotFoundException;
 import axo.spotifyclone.spotifyclonebe.mapper.TrackResponseMapper;
 import axo.spotifyclone.spotifyclonebe.service.LikedMusicService;
 import axo.spotifyclone.spotifyclonebe.service.MediaUrlService;
@@ -33,8 +34,11 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 @Import({LikedMusicServiceImplement.class, TrackResponseMapper.class, PaginationRequestFactory.class})
 @Sql("classpath:search-schema.sql")
-@Sql(statements = "CREATE TABLE IF NOT EXISTS liked_music (id UUID PRIMARY KEY, " +
-        "user_id VARCHAR(255) NOT NULL, track_id UUID NOT NULL)")
+@Sql(statements = {
+        "CREATE TABLE IF NOT EXISTS liked_music (id UUID DEFAULT RANDOM_UUID() PRIMARY KEY, " +
+                "user_id VARCHAR(255) NOT NULL, track_id UUID NOT NULL)",
+        "CREATE TABLE IF NOT EXISTS app_user (id VARCHAR(255) PRIMARY KEY, username TEXT, email TEXT)"
+})
 class LikedMusicServiceTests {
     @Autowired private LikedMusicService likedMusicService;
     @Autowired private JdbcTemplate jdbc;
@@ -44,6 +48,7 @@ class LikedMusicServiceTests {
 
     @BeforeEach
     void seedLikes(){
+        jdbc.update("INSERT INTO app_user (id) VALUES ('listener'), ('other-user')");
         jdbc.update("INSERT INTO album (album_id, album_title, album_author, album_release_date, album_cover_key) " +
                 "VALUES (?, 'Album', 'Artist', DATE '2026-01-01', 'cover')", id(1));
         for(int number = 1; number <= 3; number++){
@@ -104,6 +109,41 @@ class LikedMusicServiceTests {
     void missingUserIdIsRejected(String userId){
         assertThatThrownBy(() -> likedMusicService.listLikedTracks(userId, 0, 20))
                 .isInstanceOf(BadRequestException.class);
+    }
+
+    @Test
+    void settingLikeTwiceAddsOneTrackAndRemovingItLeavesOtherUsersLikes(){
+        likedMusicService.setTrackLiked("listener", id(3), true);
+        likedMusicService.setTrackLiked("listener", id(3), true);
+
+        var liked = likedMusicService.listLikedTracks("listener", 0, 20);
+        assertThat(liked.getData()).extracting(TrackDetailsResponse::getTrackId)
+                .containsExactlyInAnyOrder(id(1), id(2), id(3));
+
+        likedMusicService.setTrackLiked("listener", id(3), false);
+        likedMusicService.setTrackLiked("listener", id(3), false);
+
+        assertThat(likedMusicService.listLikedTracks("listener", 0, 20).getData())
+                .extracting(TrackDetailsResponse::getTrackId).containsExactly(id(2), id(1));
+        assertThat(likedMusicService.listLikedTracks("other-user", 0, 20).getData())
+                .extracting(TrackDetailsResponse::getTrackId).containsExactly(id(3));
+    }
+
+    @Test
+    void likingAnUnknownTrackReturnsNotFound(){
+        assertThatThrownBy(() -> likedMusicService.setTrackLiked("listener", id(4), true))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void unlikingRemovesStaleAndDuplicateLikes(){
+        jdbc.update("INSERT INTO liked_music (id, user_id, track_id) VALUES (?, 'listener', ?), (?, 'listener', ?)",
+                id(4), id(4), id(5), id(4));
+
+        likedMusicService.setTrackLiked("listener", id(4), false);
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM liked_music WHERE user_id = ? AND track_id = ?",
+                Long.class, "listener", id(4))).isZero();
     }
 
     private UUID id(int number){

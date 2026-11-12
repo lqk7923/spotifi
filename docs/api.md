@@ -8,6 +8,7 @@ All property names, error codes, and application-generated messages use English.
 | --- | --- | --- | --- |
 | GET | `/users/me` | Current user's stored ID, username, and email | Bearer token |
 | GET | `/users/me/liked-music?page=0&size=20` | Paginated track metadata for the current user's liked music | Bearer token |
+| PATCH | `/users/me/liked-music/{trackId}` | Set the current user's like for a track, returning 204 | Bearer token |
 | GET | `/tracks?q=hello&page=0&size=20` | Paginated track metadata with optional search | Public |
 | GET | `/tracks/{id}` | Track metadata | Bearer token |
 | GET | `/tracks/{id}/playback` | Audio URL and expiration | Bearer token |
@@ -29,6 +30,16 @@ Example request:
 ```http
 GET /users/me/liked-music?page=0&size=20
 Authorization: Bearer <access_token>
+```
+
+`PATCH /users/me/liked-music/{trackId}` sets the like for the authenticated user. Send `{"liked": true}` to like the track or `{"liked": false}` to unlike it. Repeating the same request leaves the same state. Success returns 204 with an empty body. An invalid UUID or missing `liked` value returns 400. Liking a track that does not exist returns 404. Unliking succeeds even if the track or like is already absent.
+
+```http
+PATCH /users/me/liked-music/743360a4-07d9-4356-b75c-65517b48229a
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{"liked": true}
 ```
 
 Every track must belong to an existing album. Track detail and paginated track queries use inner joins to albums, with the same join in the pagination count queries. When the album tracks query counts zero tracks, the service checks whether the album exists. Playback without metadata reads only the track's audio key.
