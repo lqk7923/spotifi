@@ -1,6 +1,5 @@
-
 INSERT INTO album(album_id, album_author, album_title, album_cover_key, album_release_date, album_type)
-values
+VALUES
     ('9e6c7ab6-e760-4abb-986b-99bff71802f2'::uuid,'looplicator','Industrial Drum','track_cover/industrial_drums.jpg', date '2026-01-02', 'SINGLE'),
     ('cc32a6e3-e401-4800-9c09-01a71d9f83da'::uuid,'josefpres','Piano and Music','track_cover/piano_and_music.jpg',date '2026-10-24', 'EP'),
     ('43840c7c-2fa0-4252-b254-ef0e0e767cc4'::uuid,'joanne_pang','Peaceful Harp','track_cover/peaceful_harp.jpg',date '2026-5-10', 'SINGLE'),
@@ -10,8 +9,7 @@ values
     ('baef7ba0-8a01-4e6e-8444-efe3d276e263'::uuid,'fredericfont','Puckr Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14', 'SINGLE'),
     ('c07112d5-334b-41c3-95a7-6df3da5d9b46'::uuid,'x1shi','Seamless Game Music','track_cover/video_game_music_seamless.jpg', date '2026-10-14', 'SINGLE');
 
-
-    Insert into track(track_key, track_title, track_duration, author, album_id)
+INSERT INTO track(track_key, track_title, track_duration, author, album_id)
 VALUES
 ( 'track_file/calm_night_x_hal_jordan_@youngrich89.wav','Calm Night x Hal Jordan', 173000, 'youngrich89', '743360a4-07d9-4356-b75c-65517b48229a'::uuid),
 ( 'track_file/industrialdrum_by_@looplicator.wav', 'Industrial Drum', 12000, 'looplicator', '9e6c7ab6-e760-4abb-986b-99bff71802f2'::uuid),
@@ -26,6 +24,3 @@ VALUES
 ( 'track_file/no_tomorrow_@seth_makes_sounds.wav', 'No Tomorrow',93000, 'seth makes sounds', '4c051112-0da8-4951-b1cf-27b8e67edd57'::uuid),
 ( 'track_file/puckr_music_level_1_@fredericfont.wav', 'Puckr Music Level 1',73000, 'fredericfont', 'baef7ba0-8a01-4e6e-8444-efe3d276e263'::uuid),
 ( 'track_file/video_game_music_seamless_@x1shi.wav', 'Video Game Music Seamless',113000, 'x1shi', 'c07112d5-334b-41c3-95a7-6df3da5d9b46'::uuid);
-
--- SELECT * FROM TRACK;
-select t1_0.track_id,t1_0.track_title,t1_0.track_duration,a1_0.album_author,a1_0.album_title,t1_0.album_id,a1_0.album_cover_key,a1_0.album_release_date from track t1_0 join album a1_0 on t1_0.album_id=a1_0.album_id
